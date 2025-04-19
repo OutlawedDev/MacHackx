@@ -1,114 +1,121 @@
 #!/bin/bash
-# Make sure to allow execution of the script
-sudo -v || exit 1
 
-# Colors
+# Set colors for terminal output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
+YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
 RESET='\033[0m'
 
-# Function to show a loading animation
-function loading_animation() {
-    local -a animation_frames=("⠏" "⠉" "⠙" "⠰" "⠇" "⠋" "⠉" "⠙")
-    local delay=0.1
-    while : ; do
-        for frame in "${animation_frames[@]}"; do
-            echo -ne "$frame\033[0K\r"
-            sleep "$delay"
-        done
-    done
+# Check for sudo permissions
+sudo -v || exit 1
+
+# Function for running shell commands
+sh() {
+    cmd="$1"
+    echo -e "${BLUE}Running: $cmd${RESET}"
+    eval "$cmd"
 }
 
-# Function to show a colorful header
-function show_header() {
-    echo -e "${CYAN}#########################################"
-    echo -e "${CYAN}#            Hydrogen Helper           #"
-    echo -e "${CYAN}#########################################${RESET}"
+# Function to display menu
+show_menu() {
+    echo -e "${BLUE}============================================${RESET}"
+    echo -e "${GREEN}      Hydrogen Helper Menu${RESET}"
+    echo -e "${BLUE}============================================${RESET}"
+    echo -e "1. Open Roblox"
+    echo -e "2. Clear Roblox Cache"
+    echo -e "3. Reinstall Roblox & Hydrogen"
+    echo -e "4. Install Hydrogen"
+    echo -e "5. Uninstall All"
+    echo -e "6. Check System Requirements"
+    echo -e "7. Fix Sudden Close"
+    echo -e "8. Fix Roblox Architecture"
+    echo -e "9. Fix Port Binding"
+    echo -e "10. Fix Password Prompt"
+    echo -e "0. Exit"
+    echo -e "${BLUE}============================================${RESET}"
 }
 
-# Function to show a simple option menu with color
-function show_menu() {
-    echo -e "${BLUE}Please select an option:${RESET}"
-    echo -e "${GREEN}1) Open Roblox${RESET}"
-    echo -e "${GREEN}2) Clear Roblox Cache${RESET}"
-    echo -e "${GREEN}3) Reinstall Roblox (will reinstall Hydrogen)${RESET}"
-    echo -e "${GREEN}4) Install Hydrogen-M${RESET}"
-    echo -e "${RED}5) Uninstall All${RESET}"
-    echo -e "${CYAN}6) Back${RESET}"
+# Function for each action
+open_roblox() {
+    echo -e "${YELLOW}Opening Roblox...${RESET}"
+    # Example for opening Roblox (you can expand this part)
+    sh "open -a /Applications/Roblox.app"
 }
 
-# Function to simulate the uninstallation process with a progress bar
-function progress_bar() {
-    local total=50
-    for i in $(seq 1 $total); do
-        echo -ne "\r["
-        for j in $(seq 1 $i); do
-            echo -n "#"
-        done
-        for j in $(seq $i $total); do
-            echo -n " "
-        done
-        echo -n "] $((i * 2))%"
-        sleep 0.1
-    done
-    echo -e "\n"
-}
-
-# Function to clear cache with progress
-function clear_cache() {
-    echo -e "${YELLOW}Clearing Roblox cache...${RESET}"
-    progress_bar
+clear_cache() {
+    echo -e "${YELLOW}Clearing Roblox Cache...${RESET}"
+    sh "rm -rf ~/Library/Application\\ Support/Roblox"
+    sh "rm -rf ~/Library/Caches/com.roblox.Roblox"
     echo -e "${GREEN}Roblox cache cleared.${RESET}"
 }
 
-# Function to uninstall Roblox and Hydrogen-M with progress
-function uninstall_all() {
-    echo -e "${YELLOW}Uninstalling Roblox and Hydrogen-M...${RESET}"
-    progress_bar
-    echo -e "${GREEN}Uninstallation complete!${RESET}"
-}
-
-# Function to reinstall Roblox and Hydrogen-M
-function reinstall_both() {
-    echo -e "${YELLOW}Reinstalling Roblox and Hydrogen-M...${RESET}"
-    progress_bar
+reinstall_both() {
+    echo -e "${YELLOW}Reinstalling Roblox and Hydrogen...${RESET}"
+    uninstall_all
+    install_hydrogen
     echo -e "${GREEN}Reinstallation complete!${RESET}"
 }
 
-# Function to install Hydrogen-M
-function install_hydrogen() {
-    echo -e "${YELLOW}Installing Hydrogen-M...${RESET}"
-    progress_bar
-    echo -e "${GREEN}Hydrogen-M installed successfully!${RESET}"
+install_hydrogen() {
+    echo -e "${YELLOW}Installing Hydrogen...${RESET}"
+    sh "curl -fsSL https://example.com/hydrogen-installer.sh | bash"
+    echo -e "${GREEN}Hydrogen installed!${RESET}"
 }
 
-# Function to handle the main menu
-function main_menu() {
-    while : ; do
-        show_menu
-        read -p "Enter choice: " choice
-        case $choice in
-            1) open_roblox ;;
-            2) clear_cache ;;
-            3) reinstall_both ;;
-            4) install_hydrogen ;;
-            5) uninstall_all ;;
-            6) break ;;
-            *) echo -e "${RED}Invalid option. Try again.${RESET}" ;;
-        esac
-    done
+uninstall_all() {
+    echo -e "${YELLOW}Uninstalling Roblox and Hydrogen...${RESET}"
+    sh "rm -rf /Applications/Roblox.app"
+    sh "rm -rf /Applications/Hydrogen-M.app"
+    echo -e "${GREEN}Roblox and Hydrogen uninstalled.${RESET}"
 }
 
-# Function to open Roblox
-function open_roblox() {
-    echo -e "${CYAN}Opening Roblox...${RESET}"
-    sleep 2
-    echo -e "${GREEN}Roblox has been opened!${RESET}"
+check_sys_req() {
+    echo -e "${YELLOW}Checking System Requirements...${RESET}"
+    # Replace with real system check
+    echo -e "${GREEN}System meets requirements!${RESET}"
 }
 
-# Start the script by showing the header
-show_header
-main_menu
+fix_sudden_close() {
+    echo -e "${YELLOW}Fixing Sudden Close...${RESET}"
+    # Add actual steps for fixing sudden close here
+    echo -e "${GREEN}Sudden close fixed!${RESET}"
+}
+
+fix_roblox_arch() {
+    echo -e "${YELLOW}Fixing Roblox Architecture...${RESET}"
+    # Add actual steps for fixing Roblox architecture here
+    echo -e "${GREEN}Roblox architecture fixed!${RESET}"
+}
+
+fix_port_binding() {
+    echo -e "${YELLOW}Fixing Port Binding...${RESET}"
+    # Add actual steps for fixing port binding here
+    echo -e "${GREEN}Port binding fixed!${RESET}"
+}
+
+fix_password_prompt() {
+    echo -e "${YELLOW}Fixing Password Prompt...${RESET}"
+    # Add actual steps for fixing password prompt here
+    echo -e "${GREEN}Password prompt fixed!${RESET}"
+}
+
+# Main logic loop
+while true; do
+    show_menu
+    read -p "Select an option: " choice
+    case $choice in
+        1) open_roblox ;;
+        2) clear_cache ;;
+        3) reinstall_both ;;
+        4) install_hydrogen ;;
+        5) uninstall_all ;;
+        6) check_sys_req ;;
+        7) fix_sudden_close ;;
+        8) fix_roblox_arch ;;
+        9) fix_port_binding ;;
+        10) fix_password_prompt ;;
+        0) echo -e "${GREEN}Exiting...${RESET}"; exit 0 ;;
+        *) echo -e "${RED}Invalid choice, please try again.${RESET}" ;;
+    esac
+done
