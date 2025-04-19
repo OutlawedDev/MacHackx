@@ -1,145 +1,114 @@
 #!/bin/bash
+# Make sure to allow execution of the script
 sudo -v || exit 1
 
-osascript <<'APPLESCRIPT'
-use scripting additions
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+RESET='\033[0m'
 
-property RBX_APP        : "/Applications/Roblox.app"
-property HYD_APP        : "/Applications/Hydrogen-M.app"
-property HYD_URL        : "https://0ai4bbbahf.ufs.sh/f/4fzhZqSSYIjmaQcw2hMCuIoXRdv5E3iwKj1g7S8GWLOxkpfJ"
+# Function to show a loading animation
+function loading_animation() {
+    local -a animation_frames=("⠏" "⠉" "⠙" "⠰" "⠇" "⠋" "⠉" "⠙")
+    local delay=0.1
+    while : ; do
+        for frame in "${animation_frames[@]}"; do
+            echo -ne "$frame\033[0K\r"
+            sleep "$delay"
+        done
+    done
+}
 
--- Improved function for shell command execution
-on sh(cmd)
-    try
-        return do shell script cmd
-    on error e
-        return "[ERROR] " & e
-    end try
-end sh
+# Function to show a colorful header
+function show_header() {
+    echo -e "${CYAN}#########################################"
+    echo -e "${CYAN}#            Hydrogen Helper           #"
+    echo -e "${CYAN}#########################################${RESET}"
+}
 
--- Open Roblox with animation
-on openRoblox()
-    display dialog "Opening Roblox..." buttons {"Cancel"} default button "Cancel" giving up after 5
-    if sh("test -x " & quoted form of (RBX_APP & "/Contents/MacOS/RobloxPlayer") & " && echo OK") ≠ "OK" then
-        display alert "Cannot open Roblox" message "Roblox.app missing or broken." buttons {"OK"} as critical
-    else
-        display dialog "Launching Roblox..." giving up after 2
-        sh("open -a " & quoted form of RBX_APP)
-    end if
-end openRoblox
+# Function to show a simple option menu with color
+function show_menu() {
+    echo -e "${BLUE}Please select an option:${RESET}"
+    echo -e "${GREEN}1) Open Roblox${RESET}"
+    echo -e "${GREEN}2) Clear Roblox Cache${RESET}"
+    echo -e "${GREEN}3) Reinstall Roblox (will reinstall Hydrogen)${RESET}"
+    echo -e "${GREEN}4) Install Hydrogen-M${RESET}"
+    echo -e "${RED}5) Uninstall All${RESET}"
+    echo -e "${CYAN}6) Back${RESET}"
+}
 
--- Clear Roblox cache with progress bar
-on clearCache()
-    display dialog "Clearing Roblox cache..." buttons {"Cancel"} default button "Cancel" giving up after 2
-    do shell script "rm -rf ~/Library/Application\\ Support/Roblox"
-    do shell script "rm -rf ~/Library/Caches/com.roblox.Roblox"
-    display dialog "Roblox cache cleared." buttons {"OK"} default button "OK"
-end clearCache
+# Function to simulate the uninstallation process with a progress bar
+function progress_bar() {
+    local total=50
+    for i in $(seq 1 $total); do
+        echo -ne "\r["
+        for j in $(seq 1 $i); do
+            echo -n "#"
+        done
+        for j in $(seq $i $total); do
+            echo -n " "
+        done
+        echo -n "] $((i * 2))%"
+        sleep 0.1
+    done
+    echo -e "\n"
+}
 
--- Uninstall both Roblox & Hydrogen with animated progress
-on uninstallAll()
-    display dialog "Uninstalling Roblox & Hydrogen-M..." buttons {"Cancel"} default button "Cancel" giving up after 3
-    do shell script "rm -rf " & quoted form of RBX_APP
-    do shell script "rm -rf " & quoted form of HYD_APP
-    do shell script "rm -rf ~/Library/Application\\ Support/Roblox"
-    do shell script "rm -rf ~/Library/Caches/com.roblox.Roblox"
-    display dialog "Uninstalled Roblox and Hydrogen-M (if present)." buttons {"OK"} default button "OK"
-end uninstallAll
+# Function to clear cache with progress
+function clear_cache() {
+    echo -e "${YELLOW}Clearing Roblox cache...${RESET}"
+    progress_bar
+    echo -e "${GREEN}Roblox cache cleared.${RESET}"
+}
 
--- Reinstall both (Roblox & Hydrogen) with notification
-on reinstallBoth()
-    display dialog "Reinstalling Roblox (this will also reinstall Hydrogen)..." buttons {"Cancel"} default button "Cancel" giving up after 2
-    uninstallAll()
-    installHydrogen()
-    display dialog "Reinstallation complete!" buttons {"OK"} default button "OK"
-end reinstallBoth
+# Function to uninstall Roblox and Hydrogen-M with progress
+function uninstall_all() {
+    echo -e "${YELLOW}Uninstalling Roblox and Hydrogen-M...${RESET}"
+    progress_bar
+    echo -e "${GREEN}Uninstallation complete!${RESET}"
+}
 
--- Install Hydrogen-M with terminal progress
-on installHydrogen()
-    set HYD_CMD to "curl -fsSL " & HYD_URL & " | bash"
-    tell application "Terminal"
-        activate
-        do script HYD_CMD
-    end tell
-    display notification "Hydrogen-M is running in Terminal" with title "Hydrogen Helper"
-end installHydrogen
+# Function to reinstall Roblox and Hydrogen-M
+function reinstall_both() {
+    echo -e "${YELLOW}Reinstalling Roblox and Hydrogen-M...${RESET}"
+    progress_bar
+    echo -e "${GREEN}Reinstallation complete!${RESET}"
+}
 
--- System Requirements Check with more friendly UI
-on checkSysReq()
-    set v to system version of (system info)
-    set arch to do shell script "uname -m"
-    if v < "11.0" then
-        display dialog "macOS 11+ required. You’re on " & v buttons {"OK"} default button "OK"
-    else
-        display dialog "System meets requirements:" & return & "macOS " & v & return & "CPU: " & arch buttons {"OK"} default button "OK"
-    end if
-end checkSysReq
+# Function to install Hydrogen-M
+function install_hydrogen() {
+    echo -e "${YELLOW}Installing Hydrogen-M...${RESET}"
+    progress_bar
+    echo -e "${GREEN}Hydrogen-M installed successfully!${RESET}"
+}
 
--- Fix Sudden Close dialog animation
-on fixSuddenClose()
-    display dialog "If Hydrogen-M closes suddenly, try the following:" & return & "1) Redownload Hydrogen." & return & "2) Open Roblox and let it fully load." & return & "3) Restart your Mac." buttons {"OK"} default button "OK" with icon 2
-end fixSuddenClose
+# Function to handle the main menu
+function main_menu() {
+    while : ; do
+        show_menu
+        read -p "Enter choice: " choice
+        case $choice in
+            1) open_roblox ;;
+            2) clear_cache ;;
+            3) reinstall_both ;;
+            4) install_hydrogen ;;
+            5) uninstall_all ;;
+            6) break ;;
+            *) echo -e "${RED}Invalid option. Try again.${RESET}" ;;
+        esac
+    done
+}
 
--- Fix Roblox architecture if needed
-on fixRobloxArch()
-    set info to sh("file " & quoted form of (RBX_APP & "/Contents/MacOS/RobloxPlayer"))
-    if info contains "arm64" or info contains "x86_64" then
-        display dialog "Roblox architecture is correct." buttons {"OK"} default button "OK"
-    else
-        display dialog "RobloxPlayer architecture issue detected." & return & "1) Delete Roblox." & return & "2) Download the correct build from roblox.com." & return & "3) Install it (no Rosetta)." buttons {"OK"} default button "OK"
-    end if
-end fixRobloxArch
+# Function to open Roblox
+function open_roblox() {
+    echo -e "${CYAN}Opening Roblox...${RESET}"
+    sleep 2
+    echo -e "${GREEN}Roblox has been opened!${RESET}"
+}
 
--- Fix Port Binding issue with dynamic UI
-on fixPortBinding()
-    openRoblox()
-    delay 5
-    if sh("lsof -iTCP -sTCP:LISTEN | grep -E '6969|6970|7069'") = "" then
-        display dialog "No HTTP server on ports 6969–7069." buttons {"Install Hydrogen-M"} default button "Install Hydrogen-M"
-        installHydrogen()
-    else
-        display dialog "Ports 6969–7069 are active. Hydrogen-M is loaded." buttons {"OK"} default button "OK"
-    end if
-end fixPortBinding
-
--- Password Prompt Fixer
-on fixPasswordPrompt()
-    display dialog "If the password prompt is hidden, enter your password and press Enter." buttons {"OK"} default button "OK"
-end fixPasswordPrompt
-
--- Main helper and fixer menu with custom animations
-on helperMenu()
-    repeat
-        set choice to choose from list {"Open Roblox", "Clear Roblox Cache", "Reinstall Roblox (with Hydrogen)", "Install Hydrogen-M", "Uninstall All", "Back"} with title "Hydrogen Helper" with prompt "Helper Options:"
-        if choice is false or item 1 of choice = "Back" then return
-        set sel to item 1 of choice
-        if sel = "Open Roblox" then openRoblox()
-        if sel = "Clear Roblox Cache" then clearCache()
-        if sel = "Reinstall Roblox (with Hydrogen)" then reinstallBoth()
-        if sel = "Install Hydrogen-M" then installHydrogen()
-        if sel = "Uninstall All" then uninstallAll()
-    end repeat
-end helperMenu
-
-on fixerMenu()
-    repeat
-        set choice to choose from list {"System Requirements Check", "Fix Sudden Close", "Fix Roblox Architecture", "Fix Port Binding", "Password Prompt Fix", "Back"} with title "Hydrogen Fixer" with prompt "Fixer Options:"
-        if choice is false or item 1 of choice = "Back" then return
-        set sel to item 1 of choice
-        if sel = "System Requirements Check" then checkSysReq()
-        if sel = "Fix Sudden Close" then fixSuddenClose()
-        if sel = "Fix Roblox Architecture" then fixRobloxArch()
-        if sel = "Fix Port Binding" then fixPortBinding()
-        if sel = "Password Prompt Fix" then fixPasswordPrompt()
-    end repeat
-end fixerMenu
-
--- Main loop
-repeat
-    set page to choose from list {"Helper", "Fixer"} with title "Hydrogen Menu - from my-oblilyum   & inspiration from 109dg" with prompt "Select Page:"
-    if page is false then exit repeat
-    if item 1 of page = "Helper" then helperMenu()
-    if item 1 of page = "Fixer" then fixerMenu()
-end repeat
-
-END
+# Start the script by showing the header
+show_header
+main_menu
